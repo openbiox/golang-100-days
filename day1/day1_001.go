@@ -6,10 +6,12 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 func main() {
 
+	fmt.Println("[Debug]", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("vim-go")
 
 	// practice fmt.Println: split by space
