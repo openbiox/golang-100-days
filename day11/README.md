@@ -68,33 +68,28 @@ func LOG(level string, formating string, args ...interface{}) {
 func GenerateDict(reffa *Reffa, outDict string, config *TaiFiles, params *TaiParams) bool {
 	INFO("")
 	cfg := config.Default
-	//extraOption := params.Reffa.GenerateDictExtra
+	extraOption := params.Reffa.GenerateDictExtra
 	wd, _ := os.Getwd()
-	logPath := fmt.Sprintf("%s/log/%s.generate_dict.log", wd, reffa.Id)
-	if isExists, _ := PathExists(path.Dir(logPath)); !isExists {
-		os.MkdirAll(path.Dir(logPath), os.ModePerm)
-	}
-	if isExists, _ := PathExists(path.Dir(outDict)); !isExists {
-		os.MkdirAll(path.Dir(outDict), os.ModePerm)
-	}
-	log.SetPrefix("[BASH] ")
-	cmd := exec.Command(cfg.Java, "-jar", cfg.Picard, "CreateSequenceDictionary", "R="+reffa.Path, "O="+outDict)
-	var stdout, sterr bytes.Buffer
-	cmd.Stdout, cmd.Stderr = &stdout, &sterr
-	logFn, err := ConnectFile(logPath)
-	if err != nil {
+	logPath := fmt.Sprintf("%s/log/%s.GenerateDict.log", wd, reffa.Id)
+	var cmd *exec.Cmd
+
+	CreateFileParDir(logPath)
+	if err := CreateFileParDir(outDict); err != nil {
+		log.Fatalf("Can not create output directory of file %s", outDict)
 		return false
 	}
 
-	cmdStr := strings.Join(cmd.Args, " ") + " &> " + logPath
-	if err := cmd.Run(); err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+	args := []string{"-jar", cfg.Picard, "CreateSequenceDictionary", "R=" + reffa.Path, "O=" + outDict}
+	if len(extraOption) >= 1 && extraOption[0] != "" {
+		args = MergeSlice(args, extraOption)
+	}
+	cmd = exec.Command(cfg.Java, args...)
+
+	status := !RunExecCmd(logPath, cmd)
+	hasFile, _ := PathExists(outDict)
+	if status && !hasFile {
 		return false
 	}
-	cmd.Wait()
-	log.SetOutput(io.MultiWriter(os.Stderr, logFn))
-	log.Println(cmdStr)
-	log.Println(sterr.String())
 	return true
 }
 ```
