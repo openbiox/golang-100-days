@@ -2,8 +2,10 @@
 
 [Logrus](https://github.com/sirupsen/logrus) is a structured logger for Go (golang), completely API compatible with the standard library logger.
 
+See my package in developing: https://github.com/JhuangLab/libtai/blob/master/utils/cmd.go
+
+
 ```go
-// see my package code: https://github.com/JhuangLab/libtai/blob/master/utils/cmd.go
 package utils
 
 import (
@@ -38,6 +40,7 @@ func RunExecCmd(logPath string, cmd *exec.Cmd) bool {
 	cmd.Wait()
 	logBash.Info(cmdStr)
 	log.Info(sterr.String())
+	log.Info(stdout.String())
 	if err != nil {
 		log.Warningf("cmd.Run() failed with %s\n", err)
 		log.SetOutput(os.Stderr)
